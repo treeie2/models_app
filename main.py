@@ -11,7 +11,7 @@ app = Flask(__name__)
 
 # 数据路径
 DATA_DIR = Path(__file__).parent / 'data' / 'sentiment'
-SEARCH_INDEX_FILE = DATA_DIR / 'search_index_lite.json.gz'
+SEARCH_INDEX_FILE = DATA_DIR / 'search_index_full.json.gz'
 
 # 加载数据
 print("📋 加载数据...")

@@ -8,10 +8,10 @@ __pycache__/
 dist/
 build/
 
-# 数据文件（只保留压缩的 lite 版本）
+# 数据文件（只保留压缩的 full 版本）
 data/sentiment/*.json
-data/sentiment/search_index_v2*
-!data/sentiment/search_index_lite.json.gz
+data/sentiment/search_index_lite*
+!data/sentiment/search_index_full.json.gz
 
 # 环境变量
 .env

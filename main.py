@@ -138,6 +138,53 @@ def api_suggest():
            for c, d in stocks.items() if q.lower() in d.get('name','').lower()]
     return jsonify({'suggestions': sug[:10]})
 
+# 数据文件路径
+MASTER_FILE = Path(__file__).parent / 'data' / 'master' / 'stocks_master.json'
+
+@app.route('/api/stock/<code>/insights', methods=['PUT'])
+def update_insights(code):
+    """更新股票的 insights 字段"""
+    if code not in stocks:
+        return jsonify({'error': '股票不存在'}), 404
+    
+    data = request.get_json()
+    new_insights = data.get('insights', '')
+    
+    # 加载主数据文件
+    try:
+        with open(MASTER_FILE, 'r', encoding='utf-8') as f:
+            master_data = json.load(f)
+        
+        # 查找并更新股票
+        updated = False
+        for stock in master_data.get('stocks', []):
+            if stock.get('code') == code:
+                if 'llm_summary' not in stock:
+                    stock['llm_summary'] = {}
+                stock['llm_summary']['insights'] = new_insights
+                updated = True
+                
+                # 同步更新内存中的 stocks 字典
+                stocks[code]['insights'] = new_insights
+                break
+        
+        if not updated:
+            return jsonify({'error': '股票不存在'}), 404
+        
+        # 保存回文件
+        with open(MASTER_FILE, 'w', encoding='utf-8') as f:
+            json.dump(master_data, f, ensure_ascii=False, indent=2)
+        
+        # 重新构建搜索索引
+        import subprocess
+        subprocess.run(['python3', 'build_index.py'], 
+                      cwd=Path(__file__).parent, 
+                      capture_output=True)
+        
+        return jsonify({'success': True, 'message': '已保存'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     print(f"🚀 启动于 port {port}")

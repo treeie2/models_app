@@ -422,19 +422,51 @@
         {% endif %}
 
         <!-- 投资洞察（多来源） -->
-        {% if insights and insights|length > 0 %}
         <div class="card mb-6">
-            <div class="section-title">
-                <span style="color: var(--secondary)">💡</span> 投资洞察
+            <div class="section-title" style="justify-content: space-between;">
+                <div>
+                    <span style="color: var(--secondary)">💡</span> 投资洞察
+                </div>
+                <button onclick="toggleEditInsights()" class="text-xs px-3 py-1 rounded transition" 
+                    style="background: rgba(123, 47, 255, 0.2); color: var(--secondary); border: 1px solid rgba(123, 47, 255, 0.3);"
+                    onmouseover="this.style.background='rgba(123, 47, 255, 0.3)'" 
+                    onmouseout="this.style.background='rgba(123, 47, 255, 0.2)'">
+                    ✏️ 编辑
+                </button>
             </div>
-            <div class="mt-4">
-                <!-- 简单处理：直接显示，CSS 处理换行 -->
+            
+            <!-- 显示模式 -->
+            <div id="insights-display" class="mt-4">
+                {% if insights and insights|length > 0 %}
                 <div class="source-block" style="border-left-color: var(--secondary)">
                     <div class="source-content" style="white-space: pre-wrap;">{{ insights }}</div>
                 </div>
+                {% else %}
+                <div class="text-gray-500 text-sm italic">暂无投资洞察，点击"编辑"添加</div>
+                {% endif %}
+            </div>
+            
+            <!-- 编辑模式 -->
+            <div id="insights-edit" class="hidden mt-4">
+                <textarea id="insights-textarea" 
+                    class="w-full p-4 rounded-lg border focus:outline-none focus:ring-2 transition"
+                    style="background: rgba(0,0,0,0.3); border-color: var(--border); color: var(--text); min-height: 300px; font-family: 'Noto Sans SC', sans-serif; line-height: 1.8;"
+                    placeholder="输入投资洞察内容...&#10;&#10;提示：多个来源可以用以下格式分隔：&#10;[1] 来源一内容&#10;&#10;---&#10;&#10;[2] 来源二内容">{{ insights or '' }}</textarea>
+                <div class="flex gap-3 mt-4">
+                    <button onclick="saveInsights()" 
+                        class="px-6 py-2 rounded-lg font-medium transition transform hover:scale-105"
+                        style="background: linear-gradient(135deg, var(--secondary), var(--accent)); color: #fff;">
+                        💾 保存
+                    </button>
+                    <button onclick="toggleEditInsights()" 
+                        class="px-6 py-2 rounded-lg font-medium transition"
+                        style="background: rgba(255,255,255,0.1); color: var(--text);">
+                        取消
+                    </button>
+                </div>
+                <div id="save-status" class="mt-3 text-sm"></div>
             </div>
         </div>
-        {% endif %}
 
         <!-- 产业链 + 关键指标 -->
         {% if chain or key_metrics %}
@@ -508,5 +540,64 @@
             <p>CYBER<span style="color: var(--primary)">RESEARCH</span> © 2026 - AI-Powered Investment Research Platform</p>
         </div>
     </footer>
+    
+    <script>
+        // 切换编辑模式
+        function toggleEditInsights() {
+            const display = document.getElementById('insights-display');
+            const edit = document.getElementById('insights-edit');
+            const isHidden = edit.classList.contains('hidden');
+            
+            if (isHidden) {
+                display.classList.add('hidden');
+                edit.classList.remove('hidden');
+            } else {
+                display.classList.remove('hidden');
+                edit.classList.add('hidden');
+            }
+        }
+        
+        // 保存 insights
+        async function saveInsights() {
+            const textarea = document.getElementById('insights-textarea');
+            const status = document.getElementById('save-status');
+            const content = textarea.value.trim();
+            
+            status.innerHTML = '<span style="color: var(--primary)">⏳ 保存中...</span>';
+            
+            try {
+                const response = await fetch(`/api/stock/{{ code }}/insights`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        insights: content
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    status.innerHTML = '<span style="color: #00ff88">✅ 保存成功！页面将刷新...</span>';
+                    
+                    // 更新显示内容
+                    document.getElementById('insights-display').innerHTML = content 
+                        ? `<div class="source-block" style="border-left-color: var(--secondary)"><div class="source-content" style="white-space: pre-wrap;">${content}</div></div>`
+                        : '<div class="text-gray-500 text-sm italic">暂无投资洞察，点击"编辑"添加</div>';
+                    
+                    // 延迟切换回显示模式
+                    setTimeout(() => {
+                        toggleEditInsights();
+                        status.innerHTML = '';
+                    }, 1000);
+                } else {
+                    status.innerHTML = `<span style="color: #ff4444">❌ 保存失败：${result.error || '未知错误'}</span>`;
+                }
+            } catch (error) {
+                status.innerHTML = `<span style="color: #ff4444">❌ 网络错误：${error.message}</span>`;
+            }
+        }
+    </script>
 </body>
 </html>

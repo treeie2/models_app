@@ -394,10 +394,10 @@ def get_market_data():
                             
                             if len(fields) >= 47:
                                 # 字段说明（腾讯财经 API）：
-                                # [0]:类型，[1]:名称，[2]:代码，[3]:当前价，[32]:涨跌幅%，[46]:总市值 (亿)，[39]:市盈率
+                                # [0]:类型，[1]:名称，[2]:代码，[3]:当前价，[32]:涨跌幅%，[44]:总市值 (亿)，[39]:市盈率
                                 price = float(fields[3]) if fields[3] else 0
                                 change_pct = float(fields[32]) if fields[32] else 0
-                                market_cap = float(fields[46]) if fields[46] else 0
+                                market_cap = float(fields[44]) if fields[44] else 0
                                 pe_ratio = float(fields[39]) if fields[39] else None
                                 
                                 result[code] = {

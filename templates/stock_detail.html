@@ -988,13 +988,20 @@
         const container = document.querySelector(`.multi-source-content[data-field="${field}"]`);
         if (!container) return;
         
-        const content = container.textContent || container.innerText;
-        if (!content || content.trim().length === 0) return;
+        // 使用 getAttribute 获取原始内容（避免 textContent 包含空白）
+        let content = container.textContent;
+        if (!content) return;
+        
+        content = content.trim();
+        if (content.length === 0) return;
+        
+        console.log(`渲染 ${field}: ${content.length} 字符`);
         
         let html = '';
         
         // 检查是否有多源标记 [1], [2], etc.
         if (content.includes('[1]')) {
+            console.log(`${field} 有多源标记`);
             for (let i = 1; i <= 10; i++) {
                 const marker = `[${i}]`;
                 const markerIndex = content.indexOf(marker);
@@ -1005,27 +1012,33 @@
                 const end = content.includes(nextMarker) ? content.indexOf(nextMarker, start) : content.length;
                 const part = content.substring(start, end).trim();
                 
-                if (part) {
+                // 移除 --- 分隔符
+                const cleanPart = part.replace(/^\s*---\s*/, '');
+                
+                if (cleanPart) {
                     const borderColor = field === 'accident' ? 'var(--accent)' : (field === 'insights' ? 'var(--secondary)' : 'var(--primary)');
                     const bgColor = field === 'accident' ? 'linear-gradient(135deg, var(--primary), var(--secondary))' : (field === 'insights' ? 'linear-gradient(135deg, var(--secondary), var(--accent))' : 'var(--primary)');
                     
                     html += `<div class="source-block" style="border-left-color: ${borderColor}">
                         <div class="flex items-start gap-3">
                             <div class="source-number flex-shrink-0" style="background: ${bgColor}">${i}</div>
-                            <div class="source-content flex-1">${part}</div>
+                            <div class="source-content flex-1">${cleanPart}</div>
                         </div>
                     </div>`;
                 }
             }
         } else {
             // 单源内容
+            console.log(`${field} 是单源内容`);
             const borderColor = field === 'accident' ? 'var(--accent)' : (field === 'insights' ? 'var(--secondary)' : 'var(--primary)');
             html = `<div class="source-block" style="border-left-color: ${borderColor}">
                 <div class="source-content">${content}</div>
             </div>`;
         }
         
-        container.innerHTML = html;
+        if (html) {
+            container.innerHTML = html;
+        }
     }
     </script>
 </body>

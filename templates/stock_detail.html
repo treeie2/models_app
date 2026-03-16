@@ -367,22 +367,26 @@
                 </div>
             </div>
             
-            <div class="grid grid-cols-4 gap-4">
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <div class="stat-box">
+                    <div class="stat-value" id="stock-price">-</div>
+                    <div class="stat-label">价格</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="stock-change">-</div>
+                    <div class="stat-label">涨跌</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="stock-market-cap">-</div>
+                    <div class="stat-label">市值 (亿)</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="stock-pe">-</div>
+                    <div class="stat-label">市盈率</div>
+                </div>
                 <div class="stat-box">
                     <div class="stat-value">{{ mention_count }}</div>
-                    <div class="stat-label">Mentions</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-value" style="color: var(--secondary)">{{ board }}</div>
-                    <div class="stat-label">Board</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-value" style="color: var(--accent)">{{ concepts|length }}</div>
-                    <div class="stat-label">Concepts</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-value">{{ articles|length }}</div>
-                    <div class="stat-label">Articles</div>
+                    <div class="stat-label">提及次数</div>
                 </div>
             </div>
         </div>
@@ -976,12 +980,58 @@
             }
         }
     
-    // 页面加载时渲染多源内容
+    // 页面加载时渲染多源内容和行情数据
     document.addEventListener('DOMContentLoaded', function() {
         renderMultiSource('accident');
         renderMultiSource('insights');
         renderMultiSource('core_business');
+        loadStockMarketData();
     });
+    
+    // 加载个股行情数据
+    async function loadStockMarketData() {
+        const code = '{{ code }}';
+        try {
+            const response = await fetch(`/api/market-data?codes=${code}`);
+            const data = await response.json();
+            
+            if (data[code]) {
+                const info = data[code];
+                
+                // 价格
+                const priceEl = document.getElementById('stock-price');
+                if (priceEl && info.price) {
+                    priceEl.textContent = info.price.toFixed(2);
+                    priceEl.style.color = 'var(--primary)';
+                }
+                
+                // 涨跌
+                const changeEl = document.getElementById('stock-change');
+                if (changeEl && info.change !== undefined) {
+                    const color = info.change >= 0 ? '#00ff88' : '#ff4444';
+                    const sign = info.change >= 0 ? '+' : '';
+                    changeEl.textContent = `${sign}${info.change.toFixed(2)}%`;
+                    changeEl.style.color = color;
+                }
+                
+                // 市值
+                const capEl = document.getElementById('stock-market-cap');
+                if (capEl && info.marketCap) {
+                    capEl.textContent = info.marketCap.toFixed(2);
+                    capEl.style.color = 'var(--secondary)';
+                }
+                
+                // 市盈率
+                const peEl = document.getElementById('stock-pe');
+                if (peEl && info.peRatio !== null && info.peRatio !== undefined) {
+                    peEl.textContent = info.peRatio.toFixed(2);
+                    peEl.style.color = 'var(--accent)';
+                }
+            }
+        } catch (error) {
+            console.error('加载行情数据失败:', error);
+        }
+    }
     
     // 渲染多源内容
     function renderMultiSource(field) {

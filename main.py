@@ -385,8 +385,8 @@ def get_market_data():
                         code_part = parts[0].split('_')
                         if len(code_part) >= 2:
                             full_code = code_part[-1]
-                            # 保留完整代码（不要去除前导 0，因为 300308 的 3 不是前导 0）
-                            code = full_code
+                            # 去除市场前缀（sh600519 -> 600519, sz300308 -> 300308）
+                            code = full_code[2:] if len(full_code) >= 2 else full_code
                             
                             # 解析数据：v_sh600000="51~浦发银行~600000~7.53~7.50~..."
                             data_str = parts[1].strip('"')

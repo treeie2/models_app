@@ -70,13 +70,21 @@ def stock_detail(code):
     other_concepts = sorted_concepts[10:]
     
     return render_template('stock_detail.html', 
-        code=code, name=d.get('name',''), board=d.get('board',''),
+        code=code, 
+        name=d.get('name',''), 
+        board=d.get('board',''),
         mention_count=d.get('mention_count',0),
-        core_concepts=core_concepts, other_concepts=other_concepts,
-        all_concepts=all_concepts,
-        industries=d.get('industries',[]),
-        products=d.get('products',[]), articles=d.get('articles',[])[:20],
-        detail_texts=d.get('detail_texts',[])[:5])
+        concepts=core_concepts,  # 模板用 concepts
+        core_business=d.get('core_business', ''),
+        industry_position=d.get('industry_position', ''),
+        accident=d.get('accident', ''),
+        insights=d.get('insights', ''),
+        chain=d.get('chain', ''),
+        key_metrics=d.get('key_metrics', ''),
+        partners=d.get('partners', []),
+        products=d.get('products', []), 
+        articles=d.get('articles', [])[:20],
+        detail_texts=d.get('detail_texts', [])[:5])
 
 @app.route('/concepts')
 def concepts_list():

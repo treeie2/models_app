@@ -23,9 +23,9 @@ def clean_text(text: str) -> str:
     # 检测是否有多来源内容（已格式化的 [1] [2] 或原始的 |||）
     has_multi_source = ' ||| ' in text or ('\n\n---\n\n' in text)
     
-    # 如果是多来源内容，先保护分隔线
+    # 如果是多来源内容，先保护分隔线（用不含空白字符的标记）
     if has_multi_source:
-        text = text.replace('\n\n---\n\n', '<<<SEPARATOR>>>')
+        text = text.replace('\n\n---\n\n', '###MULTI_SOURCE_SEP###')
     
     # 移除 [cite: x, y] 引用标记
     text = re.sub(r'\[cite:\s*\d+(?:,\s*\d+)*\]', '', text)
@@ -38,13 +38,9 @@ def clean_text(text: str) -> str:
     # 移除 HTML 标签
     text = re.sub(r'<[^>]+>', '', text)
     
-    # 恢复分隔线后再清理空白
+    # 恢复分隔线
     if has_multi_source:
-        text = text.replace('<<<SEPARATOR>>>', '\n\n---\n\n')
-        # 先保护分隔线
-        text = text.replace('\n\n---\n\n', '<<<SEPARATOR>>>')
-        text = re.sub(r'\s+', ' ', text)
-        text = text.replace('<<<SEPARATOR>>>', '\n\n---\n\n')
+        text = text.replace('###MULTI_SOURCE_SEP###', '\n\n---\n\n')
     else:
         # 移除多余空白
         text = re.sub(r'\s+', ' ', text)

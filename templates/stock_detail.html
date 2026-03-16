@@ -412,11 +412,36 @@
             <div class="section-title">
                 <span style="color: var(--accent)">⚡</span> 催化剂 / 事件驱动
             </div>
-            <div class="mt-4">
-                <!-- 简单处理：直接显示，CSS 处理换行 -->
-                <div class="source-block">
-                    <div class="source-content" style="white-space: pre-wrap;">{{ accident }}</div>
-                </div>
+            <div class="mt-4 space-y-4">
+                {% if '[1]' in accident %}
+                    <!-- 多来源格式：分割显示 -->
+                    {% for i in range(1, 10) %}
+                        {% set marker = '[' + i|string + ']' %}
+                        {% if marker in accident %}
+                            {% set start = accident.index(marker) + marker|length %}
+                            {% set next_marker = '[' + (i+1)|string + ']' %}
+                            {% if next_marker in accident %}
+                                {% set end = accident.index(next_marker) %}
+                            {% else %}
+                                {% set end = accident|length %}
+                            {% endif %}
+                            {% set content = accident[start:end].strip() %}
+                            {% if content %}
+                            <div class="source-block">
+                                <div class="flex items-start gap-3">
+                                    <div class="source-number flex-shrink-0">{{ i }}</div>
+                                    <div class="source-content flex-1">{{ content }}</div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <!-- 单来源格式 -->
+                    <div class="source-block">
+                        <div class="source-content">{{ accident }}</div>
+                    </div>
+                {% endif %}
             </div>
         </div>
         {% endif %}
@@ -436,13 +461,35 @@
             </div>
             
             <!-- 显示模式 -->
-            <div id="insights-display" class="mt-4">
-                {% if insights and insights|length > 0 %}
-                <div class="source-block" style="border-left-color: var(--secondary)">
-                    <div class="source-content" style="white-space: pre-wrap;">{{ insights }}</div>
-                </div>
+            <div id="insights-display" class="mt-4 space-y-4">
+                {% if '[1]' in insights %}
+                    <!-- 多来源格式：分割显示 -->
+                    {% for i in range(1, 10) %}
+                        {% set marker = '[' + i|string + ']' %}
+                        {% if marker in insights %}
+                            {% set start = insights.index(marker) + marker|length %}
+                            {% set next_marker = '[' + (i+1)|string + ']' %}
+                            {% if next_marker in insights %}
+                                {% set end = insights.index(next_marker) %}
+                            {% else %}
+                                {% set end = insights|length %}
+                            {% endif %}
+                            {% set content = insights[start:end].strip() %}
+                            {% if content %}
+                            <div class="source-block" style="border-left-color: var(--secondary)">
+                                <div class="flex items-start gap-3">
+                                    <div class="source-number flex-shrink-0" style="background: linear-gradient(135deg, var(--secondary), var(--accent))">{{ i }}</div>
+                                    <div class="source-content flex-1">{{ content }}</div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
                 {% else %}
-                <div class="text-gray-500 text-sm italic">暂无投资洞察，点击"编辑"添加</div>
+                    <!-- 单来源格式 -->
+                    <div class="source-block" style="border-left-color: var(--secondary)">
+                        <div class="source-content">{{ insights }}</div>
+                    </div>
                 {% endif %}
             </div>
             

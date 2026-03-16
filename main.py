@@ -345,7 +345,7 @@ def clear_edits():
 
 @app.route('/api/market-data')
 def get_market_data():
-    """获取实时行情数据（Akshare）"""
+    """获取实时行情数据（腾讯财经 API）"""
     codes = request.args.get('codes', '').split(',')
     codes = [c for c in codes if c.strip()]
     
@@ -353,38 +353,59 @@ def get_market_data():
         return jsonify({'totalCap': 0}), 200
     
     try:
-        ak = get_akshare()
-        if not ak:
-            return jsonify({'totalCap': 0, 'error': 'Akshare 未安装'}), 200
-        
-        # 一次性获取所有 A 股行情
-        df = ak.stock_zh_a_spot_em()
-        
         result = {}
         total_cap = 0
         
-        if df is not None and len(df) > 0:
-            for code in codes:
-                try:
-                    stock_df = df[df['代码'] == code]
-                    if len(stock_df) > 0:
-                        row = stock_df.iloc[0]
-                        price = float(row.get('最新价', 0))
-                        change = float(row.get('涨跌幅', 0))
-                        market_cap = float(row.get('总市值', 0))
-                        market_cap_yi = market_cap / 100000000 if market_cap else None
-                        
-                        result[code] = {
-                            'price': price,
-                            'change': change,
-                            'marketCap': market_cap_yi
-                        }
-                        
-                        if market_cap_yi:
-                            total_cap += market_cap_yi
-                except Exception as e:
-                    print(f"处理 {code} 失败：{e}")
-                    continue
+        # 构建腾讯财经 API 请求
+        symbols = []
+        for code in codes:
+            if code.startswith('6'):
+                symbols.append(f'sh{code}')
+            else:
+                symbols.append(f'sz{code}')
+        
+        url = 'https://qt.gtimg.cn/q=' + ','.join(symbols)
+        headers = {
+            'Referer': 'https://stockapp.finance.qq.com/',
+            'User-Agent': 'Mozilla/5.0'
+        }
+        
+        # 使用 gb18030 编码（腾讯 API 默认）
+        resp = requests.get(url, headers=headers, timeout=10)
+        resp.encoding = 'gb18030'
+        
+        if resp.status_code == 200:
+            # 解析返回数据
+            lines = resp.text.strip().split('\n')
+            for line in lines:
+                if '=' in line and '~' in line:
+                    parts = line.split('=', 1)
+                    if len(parts) >= 2:
+                        # 提取股票代码：v_sh600519 -> 600519, v_sz300308 -> 300308
+                        code_part = parts[0].split('_')
+                        if len(code_part) >= 2:
+                            full_code = code_part[-1]
+                            # 保留完整代码（不要去除前导 0，因为 300308 的 3 不是前导 0）
+                            code = full_code
+                            
+                            # 解析数据：v_sh600000="51~浦发银行~600000~7.53~7.50~..."
+                            data_str = parts[1].strip('"')
+                            fields = data_str.split('~')
+                            
+                            if len(fields) >= 47:
+                                # 字段说明：0:类型，1:名称，2:代码，3:当前价，32:涨跌幅%，46:总市值 (亿)
+                                price = float(fields[3]) if fields[3] else 0
+                                change_pct = float(fields[32]) if fields[32] else 0
+                                market_cap = float(fields[46]) if fields[46] else 0
+                                
+                                result[code] = {
+                                    'price': price,
+                                    'change': change_pct,
+                                    'marketCap': market_cap
+                                }
+                                
+                                if market_cap:
+                                    total_cap += market_cap
         
         result['totalCap'] = total_cap
         return jsonify(result)

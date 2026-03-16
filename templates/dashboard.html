@@ -100,7 +100,8 @@
                             <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider" style="color: var(--text-dim);">股票</th>
                             <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider" style="color: var(--text-dim);">价格</th>
                             <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider" style="color: var(--text-dim);">涨跌</th>
-                            <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider" style="color: var(--text-dim);">市值</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider" style="color: var(--text-dim);">市值 (亿)</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider" style="color: var(--text-dim);">市盈率</th>
                             <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider" style="color: var(--text-dim);">提及次数</th>
                             <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider" style="color: var(--text-dim);">概念标签</th>
                         </tr>
@@ -122,6 +123,9 @@
                                 <span class="loading">-</span>
                             </td>
                             <td class="px-4 py-4 text-sm font-mono market-cap" data-code="{{ stock.code }}" style="color: var(--text-dim);">
+                                <span class="loading">-</span>
+                            </td>
+                            <td class="px-4 py-4 text-sm font-mono market-pe" data-code="{{ stock.code }}" style="color: var(--text-dim);">
                                 <span class="loading">-</span>
                             </td>
                             <td class="px-4 py-4">
@@ -177,9 +181,11 @@
                         const priceEl = document.querySelector(`.market-price[data-code="${code}"]`);
                         const changeEl = document.querySelector(`.market-change[data-code="${code}"]`);
                         const capEl = document.querySelector(`.market-cap[data-code="${code}"]`);
+                        const peEl = document.querySelector(`.market-pe[data-code="${code}"]`);
                         if (priceEl) priceEl.innerHTML = '<span style="color: var(--text-dim)">-</span>';
                         if (changeEl) changeEl.innerHTML = '<span style="color: var(--text-dim)">-</span>';
                         if (capEl) capEl.innerHTML = '<span style="color: var(--text-dim)">-</span>';
+                        if (peEl) peEl.innerHTML = '<span style="color: var(--text-dim)">-</span>';
                     });
                 } else {
                     // 更新价格和市值
@@ -201,6 +207,11 @@
                             const capEl = document.querySelector(`.market-cap[data-code="${code}"]`);
                             if (capEl && info.marketCap) {
                                 capEl.innerHTML = info.marketCap.toFixed(1) + '亿';
+                            }
+                            
+                            const peEl = document.querySelector(`.market-pe[data-code="${code}"]`);
+                            if (peEl && info.peRatio !== null && info.peRatio !== undefined) {
+                                peEl.innerHTML = info.peRatio.toFixed(2);
                             }
                         }
                     });

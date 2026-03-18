@@ -18,9 +18,9 @@ def clean_text(text) -> str:
     if not text:
         return ""
     
-    # 如果是数组，转换为字符串
+    # 如果是数组，用逗号连接（保持词汇独立）
     if isinstance(text, list):
-        text = ' '.join(str(t) for t in text if t)
+        return ','.join(str(t).strip() for t in text if t and str(t).strip())
     
     if not isinstance(text, str):
         return str(text)

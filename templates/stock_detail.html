@@ -1078,6 +1078,96 @@
             </div>
         </div>
         
+        <!-- ─── 估值与财务指标 ─── -->
+        <div class="info-grid" style="margin-top:1.5rem">
+            <!-- 估值信息 -->
+            {% if stock.valuation and (stock.valuation.target_market_cap or stock.valuation.pe_ratio or stock.valuation.pb_ratio) %}
+            <div class="info-card">
+                <div class="section-title">📊 估值指标</div>
+                {% if stock.valuation.target_market_cap %}
+                <div style="margin-bottom:1rem">
+                    <div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:0.4rem;font-weight:600;">目标市值</div>
+                    <div style="font-size:1.5rem;font-weight:700;color:var(--accent-amber)">{{ stock.valuation.target_market_cap }}</div>
+                </div>
+                {% endif %}
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+                    {% if stock.valuation.pe_ratio %}
+                    <div>
+                        <div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:0.2rem">市盈率 (PE)</div>
+                        <div style="font-size:1.1rem;font-weight:600;color:var(--text-primary)">{{ stock.valuation.pe_ratio }}</div>
+                    </div>
+                    {% endif %}
+                    {% if stock.valuation.pb_ratio %}
+                    <div>
+                        <div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:0.2rem">市净率 (PB)</div>
+                        <div style="font-size:1.1rem;font-weight:600;color:var(--text-primary)">{{ stock.valuation.pb_ratio }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- 财务指标 -->
+            {% if stock.financial_metrics and (stock.financial_metrics.revenue_growth or stock.financial_metrics.profit_margin or stock.financial_metrics.roe) %}
+            <div class="info-card">
+                <div class="section-title">💰 财务指标</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem">
+                    {% if stock.financial_metrics.revenue_growth %}
+                    <div>
+                        <div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:0.2rem">营收增长</div>
+                        <div style="font-size:1.1rem;font-weight:600;color:var(--accent-green)">{{ stock.financial_metrics.revenue_growth }}</div>
+                    </div>
+                    {% endif %}
+                    {% if stock.financial_metrics.profit_margin %}
+                    <div>
+                        <div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:0.2rem">利润率</div>
+                        <div style="font-size:1.1rem;font-weight:600;color:var(--accent-cyan)">{{ stock.financial_metrics.profit_margin }}</div>
+                    </div>
+                    {% endif %}
+                    {% if stock.financial_metrics.roe %}
+                    <div>
+                        <div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:0.2rem">ROE</div>
+                        <div style="font-size:1.1rem;font-weight:600;color:var(--accent-blue)">{{ stock.financial_metrics.roe }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- 市场数据 -->
+            {% if stock.market_data and (stock.market_data.market_cap or stock.market_data.total_shares) %}
+            <div class="info-card">
+                <div class="section-title">📈 市场数据</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+                    {% if stock.market_data.market_cap %}
+                    <div>
+                        <div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:0.2rem">总市值</div>
+                        <div style="font-size:1.1rem;font-weight:600;color:var(--text-primary)">{{ stock.market_data.market_cap }}</div>
+                    </div>
+                    {% endif %}
+                    {% if stock.market_data.circulating_market_cap %}
+                    <div>
+                        <div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:0.2rem">流通市值</div>
+                        <div style="font-size:1.1rem;font-weight:600;color:var(--text-primary)">{{ stock.market_data.circulating_market_cap }}</div>
+                    </div>
+                    {% endif %}
+                    {% if stock.market_data.total_shares %}
+                    <div>
+                        <div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:0.2rem">总股本</div>
+                        <div style="font-size:1.1rem;font-weight:600;color:var(--text-primary)">{{ stock.market_data.total_shares }}</div>
+                    </div>
+                    {% endif %}
+                    {% if stock.market_data.circulating_shares %}
+                    <div>
+                        <div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:0.2rem">流通股本</div>
+                        <div style="font-size:1.1rem;font-weight:600;color:var(--text-primary)">{{ stock.market_data.circulating_shares }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
         <!-- ─── 调研文章时间轴 ─── -->
         <div class="articles-section">
             <div class="articles-header">
@@ -1169,6 +1259,30 @@
                                         </div>
                                     {% endif %}
                                     
+                                    <!-- 文章摘要 -->
+                                    {% if article.summary %}
+                                        <div class="info-block" style="background:rgba(139,92,246,0.08);border-color:rgba(139,92,246,0.2)">
+                                            <div class="info-block-title" style="color:var(--accent-purple)">📝 摘要</div>
+                                            <div style="color:var(--text-secondary);font-size:0.85rem;line-height:1.6">{{ article.summary }}</div>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <!-- 文章内容 -->
+                                    {% if article.content %}
+                                        <div class="info-block" style="background:rgba(6,182,212,0.05);border-color:rgba(6,182,212,0.15)">
+                                            <div class="info-block-title" style="color:var(--accent-cyan)">📄 内容</div>
+                                            <div style="color:var(--text-secondary);font-size:0.85rem;line-height:1.6;white-space:pre-wrap">{{ article.content }}</div>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <!-- 深度分析 -->
+                                    {% if article.analysis %}
+                                        <div class="info-block" style="background:rgba(59,130,246,0.08);border-color:rgba(59,130,246,0.2)">
+                                            <div class="info-block-title" style="color:var(--accent-blue)">🔍 深度分析</div>
+                                            <div style="color:var(--text-secondary);font-size:0.85rem;line-height:1.6;white-space:pre-wrap">{{ article.analysis }}</div>
+                                        </div>
+                                    {% endif %}
+                                    
                                     <!-- 风险事件 -->
                                     {% if article.accidents and article.accidents | length > 0 %}
                                         <div class="info-block block-accidents">
@@ -1186,7 +1300,7 @@
                                         </div>
                                     {% endif %}
                                     
-                                    {% if not article.insights and not article.key_metrics and not article.target_valuation and not article.accidents %}
+                                    {% if not article.insights and not article.key_metrics and not article.target_valuation and not article.accidents and not article.summary and not article.content and not article.analysis %}
                                         <div class="empty-block">该文章暂无结构化数据</div>
                                     {% endif %}
                                 </div>

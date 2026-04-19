@@ -6,7 +6,10 @@
   "builds": [
     {
       "src": "api/index.py",
-      "use": "@vercel/python"
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "15mb"
+      }
     }
   ],
   "routes": [
@@ -21,5 +24,7 @@
   ],
   "env": {
     "PYTHONUNBUFFERED": "1"
-  }
+  },
+  "cleanUrls": false,
+  "trailingSlash": false
 }

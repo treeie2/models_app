@@ -1,8 +1,5 @@
 {
   "version": 2,
-  "git": {
-    "submodules": false
-  },
   "builds": [
     {
       "src": "api/index.py",
@@ -24,7 +21,5 @@
   ],
   "env": {
     "PYTHONUNBUFFERED": "1"
-  },
-  "cleanUrls": false,
-  "trailingSlash": false
+  }
 }
